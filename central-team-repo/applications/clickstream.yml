@@ -1,0 +1,64 @@
+---
+apiVersion: self-service/v1
+kind: "Application"
+metadata:
+  name: "clickstream-app"
+spec:
+  title: "Clickstream App"
+  description: "Clickstream records user’s clicks through their journey on our website"
+  owner: "developers-a"            # technical-id of Console Group
+
+---
+# Application Instances (environment)
+apiVersion: self-service/v1
+kind: "ApplicationInstance"
+metadata:
+  application: "clickstream-app"
+  name: "clickstream-app-indus"
+spec:
+  cluster: "dev-cluster"
+  serviceAccount: "sa-clickstream-indus"
+  resources:
+    - type: TOPIC
+      name: "my-app-"
+      patternType: PREFIXED
+    - type: SUBJECT
+      name: "my-app-"
+      patternType: PREFIXED
+    - type: CONSUMER_GROUP # GROUP pre 1.24
+      name: "my-app-"
+      patternType: PREFIXED
+---
+# Application Instances (environment)
+apiVersion: self-service/v1
+kind: "ApplicationInstance"
+metadata:
+  application: "clickstream-app"
+  name: "clickstream-app-prod3"
+spec:
+  cluster: "prod-cluster"
+  serviceAccount: "sa-clickstream-dev"
+  resources:
+    - type: TOPIC
+      name: "my-app-"
+      patternType: PREFIXED
+    - type: SUBJECT
+      name: "my-app-"
+      patternType: PREFIXED
+    - type: CONSUMER_GROUP # GROUP pre 1.24
+      name: "my-app-"
+      patternType: PREFIXED
+---
+apiVersion: self-service/v1
+kind: "ApplicationInstancePermission"
+metadata:
+  application: "clickstream-app"
+  appInstance: "clickstream-app-prod3"
+  name: "clickstream-app-prod-to-wiki"
+spec:
+  resource:
+    type: TOPIC
+    name: "my-app-"
+    patternType: PREFIXED
+  permission: READ
+  grantedTo: wiki-app-prod

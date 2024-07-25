@@ -1,0 +1,51 @@
+# Read permission granted to the Heatmap Application on click.screen-events topic
+---
+apiVersion: self-service/v1
+kind: "ApplicationInstancePermission"
+metadata:
+  application: "clickstream-app"
+  appInstance: "clickstream-app-dev"
+  name: "clickstream-app-dev-to-heatmap"
+spec:
+  resource:
+    type: TOPIC
+    name: "click.screen-events"
+    patternType: LITERAL
+  permission: READ
+  grantedTo: heatmap-app-dev
+
+
+# Read permission granted to the Heatmap Application on for the website-analytics.clicks topic
+---
+apiVersion: self-service/v1
+kind: "ApplicationInstancePermission"
+metadata:
+  application: "website-analytics"
+  appInstance: "website-analytics-prod"
+  name: "Read access of (prod)website-analytics.clicks to heatmap-app-dev "
+spec:
+  resource:
+    type: TOPIC
+    name: "website-analytics-prod.clicks"
+    patternType: LITERAL
+  permission: READ
+  grantedTo: heatmap-app-dev
+
+---
+
+# Read permission granted to the Heatmap ApplicationInstance,
+# for the website-analytics-prod.clicks topic
+apiVersion: self-service/v1
+kind: "ApplicationInstancePermission"
+metadata:
+  application: "website-analytics"
+  appInstance: "website-analytics-prod"
+  name: "Read access of (prod)website-analytics.clicks 
+          to heatmap-app-dev "
+spec:
+  resource:
+    type: TOPIC
+    name: "website-analytics-prod.clicks"
+    patternType: LITERAL
+  permission: READ
+  grantedTo: heatmap-app-dev

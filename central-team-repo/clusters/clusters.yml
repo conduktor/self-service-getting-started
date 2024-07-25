@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: KafkaCluster
+metadata:
+  name: my-cluster
+  labels:
+    friendly-name: cloud-cluster
+spec:
+    bootstrapServers: "YOUR-BOOTSTRAP-SERVER"
+    properties:
+      client.id: conduktor
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: | 
+          org.apache.kafka.common.security.plain.PlainLoginModule
+          required username='YOURAPIKEY'
+          password='YOURAPISECRET';
+    schemaRegistry:
+      url: "https://sr.com"
+      security:
+        username: YOURAPIKEY
+        password: 'YOURAPISECRET'

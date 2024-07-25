@@ -1,0 +1,16 @@
+---
+# Policies that restrict the Application to a certain range of configurations
+# on topic configs, but also on topic metadata
+apiVersion: "v1"
+kind: "TopicPolicy"
+metadata:
+  name: "generic-dev-topic-policy"
+spec:
+  policies:
+    metadata.labels.data-criticality:
+      constraint: OneOf
+      values: ["C0", "C1", "C2"]
+    spec.replicationFactor:
+      constraint: Range
+      min: 1
+      max: 10

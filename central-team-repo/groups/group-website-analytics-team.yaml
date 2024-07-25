@@ -1,0 +1,28 @@
+apiVersion: iam/v2
+kind: Group
+metadata:
+  name: website-analytics-team
+spec:
+  displayName: "Website Analytics Team"
+  description: "Members of the website analytics team"
+  members:
+    - alice@conduktor.io
+    - bob@conduktor.io
+    - admin@conduktor.io
+  permissions:
+    - resourceType: TOPIC
+      cluster: dev-cluster
+      patternType: PREFIXED
+      name: website-analytics.
+      permissions:
+        - topicViewConfig
+        - topicConsume
+        - topicProduce
+    - resourceType: TOPIC
+      cluster: prod-cluster
+      patternType: PREFIXED
+      name: website-analytics.
+      permissions:
+        - topicViewConfig
+        - topicConsume
+        - topicProduce

@@ -1,0 +1,55 @@
+# Three options available
+
+---
+# Local file
+apiVersion: kafka/v2
+kind: Subject
+metadata:
+  cluster: shadow-it
+  name: myPrefix.topic-value
+spec:
+  schemaFile: application-team-repo/kafka-resources/schemas/myPrefix.topic-value.avsc # relative to conduktor CLI execution context
+  format: AVRO
+  compatibility: BACKWARD
+
+---
+# Inline
+apiVersion: kafka/v2
+kind: Subject
+metadata:
+  cluster: shadow-it
+  name: myPrefix.topic-value
+spec:
+  schema: |
+    {
+      "type": "long"
+    }
+
+---
+# Schema reference
+apiVersion: kafka/v2
+kind: Subject
+metadata:
+  cluster: shadow-it
+  name: myPrefix.topic-value
+spec:
+  schema: |
+    {
+      "type": "record",
+      "namespace": "com.schema.avro",
+      "name": "Client",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "type": "com.schema.avro.Address"
+        }
+      ]
+    }
+  references:
+    - name: com.schema.avro.Address
+      subject: commons.address-value
+      version: 1

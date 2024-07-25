@@ -1,0 +1,125 @@
+---
+apiVersion: self-service/v1
+kind: "Application"
+metadata:
+  name: "wiki-app"
+spec:
+  title: "Wiki App"
+  description: "Wikipedia website"
+  owner: "admin"  # technical-id of Console Group
+---
+# Application Instances (environment)
+apiVersion: self-service/v1
+kind: "ApplicationInstance"
+metadata:
+  application: "wiki-app"
+  name: "wiki-app-prod"
+spec:
+  cluster: "dev-cluster"
+  serviceAccount: "sa-wiki-dev"
+  resources:
+    - type: TOPIC
+      name: "WIKI"
+      patternType: PREFIXED
+    - type: SUBJECT
+      name: "WIKI"
+      patternType: PREFIXED
+    - type: CONSUMER_GROUP # GROUP pre 1.24
+      name: "WIKI"
+      patternType: PREFIXED
+---
+apiVersion: self-service/v1
+kind: "ApplicationInstancePermission"
+metadata:
+  application: "wiki-app"
+  appInstance: "wiki-app-prod"
+  name: "wiki-prod-to-click"
+spec:
+  resource:
+    type: TOPIC
+    name: "WIKI"
+    patternType: PREFIXED
+  permission: WRITE
+  grantedTo: "clickstream-app-prod3"
+---
+# Application Instances (environment)
+apiVersion: self-service/v1
+kind: "ApplicationInstance"
+metadata:
+  application: "wiki-app"
+  name: "wiki-app-prod2"
+spec:
+  cluster: "dev-cluster"
+  serviceAccount: "sa-wiki-dev2"
+  resources:
+    - type: TOPIC
+      name: "2WIKI2"
+      patternType: PREFIXED
+    - type: SUBJECT
+      name: "2WIKI2"
+      patternType: PREFIXED
+    - type: CONSUMER_GROUP # GROUP pre 1.24
+      name: "2WIKI2"
+      patternType: PREFIXED
+---
+# Application Instances (environment)
+apiVersion: self-service/v1
+kind: "ApplicationInstance"
+metadata:
+  application: "wiki-app"
+  name: "wiki-app-prod4"
+spec:
+  cluster: "dev-cluster"
+  serviceAccount: "sa-wiki-dev"
+  resources:
+    - type: TOPIC
+      name: "WIKI"
+      patternType: PREFIXED
+    - type: SUBJECT
+      name: "WIKI"
+      patternType: PREFIXED
+    - type: CONSUMER_GROUP # GROUP pre 1.24
+      name: "WIKI"
+      patternType: PREFIXED
+
+---
+# Application Instances (environment)
+apiVersion: self-service/v1
+kind: "ApplicationInstance"
+metadata:
+  application: "wiki-app"
+  name: "wiki-app-prod5"
+spec:
+  cluster: "dev-cluster"
+  serviceAccount: "sa-wiki-dev"
+  resources:
+    - type: TOPIC
+      name: "WIKI"
+      patternType: PREFIXED
+    - type: SUBJECT
+      name: "WIKI"
+      patternType: PREFIXED
+    - type: CONSUMER_GROUP # GROUP pre 1.24
+      name: "WIKI"
+      patternType: PREFIXED
+
+---
+# Application Instances (environment)
+apiVersion: self-service/v1
+kind: "ApplicationInstance"
+metadata:
+  application: "wiki-app"
+  name: "wiki-app-prod6"
+spec:
+  cluster: "dev-cluster"
+  serviceAccount: "sa-wiki-dev"
+  resources:
+    - type: TOPIC
+      name: "WIKI"
+      patternType: PREFIXED
+    - type: SUBJECT
+      name: "WIKI"
+      patternType: PREFIXED
+    - type: CONSUMER_GROUP # GROUP pre 1.24
+      name: "WIKI"
+      patternType: PREFIXED

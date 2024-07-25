@@ -1,0 +1,34 @@
+# Permissions granted to Console users in the Application
+---
+apiVersion: self-service/v1
+kind: "ApplicationGroup"
+metadata:
+  application: "website-analytics"
+  name: "website-analytics-support"
+spec:
+  displayName: Support Group in the Web Analytics Team
+  description: |
+    Members of the Support Group are allowed:
+      Read access on all the resources
+      Can restart owned connectors
+      Can reset offsets
+  permissions:
+    - appInstance: website-analytics-dev
+      resourceType: TOPIC
+      patternType: "LITERAL"
+      name: "*" # All owned & subscribed topics
+      permissions: ["topicViewConfig", "topicConsume"]
+    - appInstance: website-analytics-dev
+      resourceType: CONSUMER_GROUP # GROUP before v1.24
+      patternType: "LITERAL"
+      name: "*" # All owned consumer groups
+      permissions: ["consumerGroupCreate", "consumerGroupReset", "consumerGroupDelete", "consumerGroupView"]
+    - appInstance: website-analytics-dev
+      resourceType: CONNECTOR
+      patternType: "LITERAL"
+      name: "*" # All owned connectors
+      permissions: ["kafkaConnectorViewConfig", "kafkaConnectorStatus", "kafkaConnectPauseResume", "kafkaConnectRestart"]
+  members:
+    - alice@conduktor.io
+  externalGroups:
+    - COMPANY-website-analytics-SUPPORT

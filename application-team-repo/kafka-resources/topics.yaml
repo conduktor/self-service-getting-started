@@ -1,0 +1,154 @@
+apiVersion: kafka/v2
+kind: "Topic"
+metadata:
+  name: "website-analytics.admin"
+  cluster: "dev-cluster"
+  labels:
+    data-criticality: C0
+    replication: none
+    domain: website-analytics
+    source-repo-url: https://github.com/my-company/website-analytics
+    conduktor.io/description: | 
+      # Admin logs for website analytics team
+      Information about admin activities in the website-analytics domain.
+      This description is not editable from the UI.
+    conduktor.io/description.editable: "false"
+spec:
+  partitions: 3
+  replicationFactor: 1
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+  
+---
+apiVersion: kafka/v2
+kind: "Topic"
+metadata:
+  name: "website-analytics.clicks"
+  cluster: "dev-cluster"
+  labels:
+    data-criticality: C1
+    replication: none
+    domain: website-analytics
+    source-repo-url: https://github.com/my-company/website-analytics
+    conduktor.io/description: | 
+      # Event Stream from Clicks
+      Click data, this description is editable.
+    conduktor.io/description.editable: "true"
+spec:
+  partitions: 3
+  replicationFactor: 1
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+---
+apiVersion: kafka/v2
+kind: "Topic"
+metadata:
+  name: "website-analytics.page-views"
+  cluster: "dev-cluster"
+  labels:
+    data-criticality: C2
+    replication: none
+    domain: website-analytics
+    source-repo-url: https://github.com/my-company/website-analytics
+spec:
+  partitions: 3
+  replicationFactor: 1
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+---
+apiVersion: kafka/v2
+kind: "Topic"
+metadata:
+  name: "website-analytics.add-to-cart"
+  cluster: "dev-cluster"
+  labels:
+    data-criticality: C2
+    replication: none
+    domain: website-analytics
+    source-repo-url: https://github.com/my-company/website-analytics
+spec:
+  partitions: 3
+  replicationFactor: 1
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+---
+apiVersion: kafka/v2
+kind: "Topic"
+metadata:
+  name: "website-analytics.admin"
+  cluster: "prod-cluster"
+  labels:
+    data-criticality: C0
+    replication: none
+    domain: website-analytics
+    source-repo-url: https://github.com/my-company/website-analytics
+    conduktor.io/description: | 
+      # Admin logs for website analytics team
+      Information about admin activities in the website-analytics domain.
+      This description is not editable from the UI.
+    conduktor.io/description.editable: "false"
+spec:
+  partitions: 3
+  replicationFactor: 1
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+---
+apiVersion: kafka/v2
+kind: "Topic"
+metadata:
+  name: "website-analytics.clicks"
+  cluster: "prod-cluster"
+  labels:
+    data-criticality: C1
+    replication: none
+    domain: website-analytics
+    source-repo-url: https://github.com/my-company/website-analytics
+    conduktor.io/description: | 
+      # Event Stream from Clicks
+      Click data, this description is editable.
+    conduktor.io/description.editable: "true"
+spec:
+  partitions: 3
+  replicationFactor: 1
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+---
+apiVersion: kafka/v2
+kind: "Topic"
+metadata:
+  name: "website-analytics.page-views"
+  cluster: "prod-cluster"
+  labels:
+    data-criticality: C2
+    replication: none
+    domain: website-analytics
+    source-repo-url: https://github.com/my-company/website-analytics
+spec:
+  partitions: 3
+  replicationFactor: 1
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+---
+apiVersion: kafka/v2
+kind: "Topic"
+metadata:
+  name: "website-analytics.add-to-cart"
+  cluster: "prod-cluster"
+  labels:
+    data-criticality: C2
+    replication: none
+    domain: website-analytics
+    source-repo-url: https://github.com/my-company/website-analytics
+spec:
+  partitions: 3
+  replicationFactor: 1
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days

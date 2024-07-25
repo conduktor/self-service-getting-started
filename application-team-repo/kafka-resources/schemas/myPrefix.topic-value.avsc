@@ -1,0 +1,15 @@
+{
+    "type": "record",
+    "namespace": "com.schema.avro",
+    "name": "Client",
+    "fields": [
+    {
+        "name": "name",
+        "type": "string"
+    },
+    {
+        "name": "address",
+        "type": "com.schema.avro.Address"
+    }
+    ]
+}

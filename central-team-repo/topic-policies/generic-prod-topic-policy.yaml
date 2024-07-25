@@ -1,0 +1,24 @@
+---
+# Policies that restrict the Application to a certain range of configurations
+# on topic configs, but also on topic metadata
+apiVersion: "v1"
+kind: "TopicPolicy"
+metadata:
+  name: "generic-prod-topic-policy"
+spec:
+  policies:
+    metadata.labels.data-criticality:
+      constraint: OneOf
+      values: ["C0", "C1", "C2"]
+    spec.replicationFactor:
+      constraint: Range
+      min: 1
+      max: 10
+    spec.partitions:
+      constraint: Range
+      min: 1
+      max: 10
+    spec.configs.retention.ms: 
+      constraint: Range
+      min: 604800000 # 7 days
+      max: 2419000000 # 28 days
