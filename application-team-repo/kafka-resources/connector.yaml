@@ -2,12 +2,15 @@
 apiVersion: kafka/v2
 kind: Connector
 metadata:
-  name: myPrefix.myConnector
+  name: click.my-connector
+  cluster: 'prod-cluster'
+  connectCluster: kafka-connect-cluster
+  labels:
+    conduktor.io/auto-restart-enabled: true
+    conduktor.io/auto-restart-frequency: 600
 spec:
-  connectCluster: myConnectCluster
-  config:
     connector.class: io.connect.jdbc.JdbcSourceConnector
     tasks.max: '1'
-    topics: myPrefix.myTopic
+    topic: click.pageviews
     connection.url: "jdbc:mysql://127.0.0.1:3306/sample?verifyServerCertificate=false&useSSL=true&requireSSL=true"
     consumer.override.sasl.jaas.config: o.a.k.s.s.ScramLoginModule required username="<user>" password="<password>";
