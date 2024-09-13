@@ -24,7 +24,7 @@ services:
 
   conduktor-console:
     container_name: conduktor-console
-    image: conduktor/conduktor-console:1.25.0
+    image: conduktor/conduktor-console:1.27.0
     depends_on:
       - postgresql
       - redpanda-0
