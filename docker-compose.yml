@@ -1,7 +1,7 @@
 services:  
   
   conduktor-ctl:
-    image: conduktor/conduktor-ctl:v0.2.7
+    image: conduktor/conduktor-ctl:0.3.0
     container_name: conduktor-ctl
     entrypoint: sleep infinity # override entry point to keep container up
     volumes:
