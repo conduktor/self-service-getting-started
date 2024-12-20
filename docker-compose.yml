@@ -33,14 +33,14 @@ services:
     volumes:
       - conduktor_data_ss:/var/conduktor
     environment:
-      CDK_DATABASE_URL: "postgres://conduktor:change_me@postgresql:5432/conduktor-console"
+      CDK_DATABASE_URL: "postgresql://conduktor:change_me@postgresql:5432/conduktor-console"
       CDK_ADMIN_EMAIL: "admin@conduktor.io"
-      CDK_ADMIN_PASSWORD: "admin-secret"
+      CDK_ADMIN_PASSWORD: "admin-S3cret"
       CDK_ORGANIZATION_NAME: "stu-conduktor-general"
       CDK_AUTH_LOCAL-USERS_0_EMAIL: "alice@conduktor.io"
-      CDK_AUTH_LOCAL-USERS_0_PASSWORD: "alice-secret"
+      CDK_AUTH_LOCAL-USERS_0_PASSWORD: "alice-S3cret"
       CDK_AUTH_LOCAL-USERS_1_EMAIL: "bob@conduktor.io"
-      CDK_AUTH_LOCAL-USERS_1_PASSWORD: "bob-secret"
+      CDK_AUTH_LOCAL-USERS_1_PASSWORD: "bob-S3cret"
       CDK_CLUSTERS_0_ID: "dev-cluster"
       CDK_CLUSTERS_0_NAME: "dev-cluster"
       CDK_CLUSTERS_0_BOOTSTRAPSERVERS: "redpanda-1:9093"
