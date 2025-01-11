@@ -7,7 +7,7 @@ metadata:
 spec:
   title: "Website Analytics"
   description: "Application for streaming web analytics"
-  owner: "website-analytics-team" # make sure this group exists in Conduktor
+  owner: "website-analytics-team" # the Conduktor group
 ---
 # ApplicationInstance for website analytics dev environment
 apiVersion: self-service/v1

@@ -1,7 +1,7 @@
 services:  
   
   conduktor-ctl:
-    image: conduktor/conduktor-ctl:0.3.0
+    image: conduktor/conduktor-ctl:v0.3.4
     container_name: conduktor-ctl
     entrypoint: sleep infinity # override entry point to keep container up
     volumes:
@@ -11,7 +11,7 @@ services:
       CDK_API_KEY: "" # generate me from the UI for the demo, CLI also available
 
   postgresql:
-    image: postgres:14
+    image: postgres:16
     hostname: postgresql
     volumes:
       - pg_data_ss:/var/lib/postgresql/data
@@ -24,7 +24,7 @@ services:
 
   conduktor-console:
     container_name: conduktor-console
-    image: conduktor/conduktor-console:1.27.0
+    image: conduktor/conduktor-console:1.30.0
     depends_on:
       - postgresql
       - redpanda-0
@@ -33,14 +33,14 @@ services:
     volumes:
       - conduktor_data_ss:/var/conduktor
     environment:
-      CDK_DATABASE_URL: "postgres://conduktor:change_me@postgresql:5432/conduktor-console"
+      CDK_DATABASE_URL: "postgresql://conduktor:change_me@postgresql:5432/conduktor-console"
       CDK_ADMIN_EMAIL: "admin@conduktor.io"
-      CDK_ADMIN_PASSWORD: "admin-secret"
+      CDK_ADMIN_PASSWORD: "adminP4ss!"
       CDK_ORGANIZATION_NAME: "stu-conduktor-general"
       CDK_AUTH_LOCAL-USERS_0_EMAIL: "alice@conduktor.io"
-      CDK_AUTH_LOCAL-USERS_0_PASSWORD: "alice-secret"
+      CDK_AUTH_LOCAL-USERS_0_PASSWORD: "aliceP4ss!"
       CDK_AUTH_LOCAL-USERS_1_EMAIL: "bob@conduktor.io"
-      CDK_AUTH_LOCAL-USERS_1_PASSWORD: "bob-secret"
+      CDK_AUTH_LOCAL-USERS_1_PASSWORD: "bobP4ss!"
       CDK_CLUSTERS_0_ID: "dev-cluster"
       CDK_CLUSTERS_0_NAME: "dev-cluster"
       CDK_CLUSTERS_0_BOOTSTRAPSERVERS: "redpanda-1:9093"
@@ -57,6 +57,12 @@ services:
       CDK_MONITORING_ALERT-MANAGER-URL: http://conduktor-monitoring:9010/
       CDK_MONITORING_CALLBACK-URL: http://conduktor-console:8080/monitoring/api/
       CDK_MONITORING_NOTIFICATIONS-CALLBACK-URL: http://localhost:8080
+  
+  conduktor-monitoring:
+    image: conduktor/conduktor-console-cortex:1.30.0
+    container_name: monitoring
+    environment:
+      CDK_CONSOLE-URL: "http://conduktor-console:8080"
   
   redpanda-0:
     command:
