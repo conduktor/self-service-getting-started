@@ -1,7 +1,7 @@
 services:  
   
   conduktor-ctl:
-    image: conduktor/conduktor-ctl:v0.3.4
+    image: conduktor/conduktor-ctl:v0.5.0
     container_name: conduktor-ctl
     entrypoint: sleep infinity # override entry point to keep container up
     volumes:
@@ -24,7 +24,7 @@ services:
 
   conduktor-console:
     container_name: conduktor-console
-    image: conduktor/conduktor-console:1.30.0
+    image: conduktor/conduktor-console:1.33.0
     depends_on:
       - postgresql
       - redpanda-0
@@ -59,7 +59,7 @@ services:
       CDK_MONITORING_NOTIFICATIONS-CALLBACK-URL: http://localhost:8080
   
   conduktor-monitoring:
-    image: conduktor/conduktor-console-cortex:1.30.0
+    image: conduktor/conduktor-console-cortex:1.33.0
     container_name: monitoring
     environment:
       CDK_CONSOLE-URL: "http://conduktor-console:8080"
