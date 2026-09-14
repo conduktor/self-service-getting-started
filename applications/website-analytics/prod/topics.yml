@@ -1,0 +1,61 @@
+# Topics owned by website-analytics-prod.
+# Same team, same file shape — but topic-rules-prod applies here, so every topic
+# needs replicationFactor 3, min.insync.replicas >= 2 and an explicit retention.
+---
+apiVersion: kafka/v2
+kind: Topic
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.prod.page-views
+  labels:
+    instance: prod
+    business-unit: marketing
+    confidentiality: internal
+    team: website-analytics
+  description: |
+    # Page views
+    One event per page load, including referrer and session id.
+  descriptionIsEditable: "false"
+spec:
+  replicationFactor: 3
+  partitions: 6
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+    min.insync.replicas: "2"
+---
+apiVersion: kafka/v2
+kind: Topic
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.prod.clicks
+  labels:
+    instance: prod
+    business-unit: marketing
+    confidentiality: internal
+    team: website-analytics
+spec:
+  replicationFactor: 3
+  partitions: 6
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+    min.insync.replicas: "2"
+---
+apiVersion: kafka/v2
+kind: Topic
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.prod.add-to-cart
+  labels:
+    instance: prod
+    business-unit: marketing
+    confidentiality: restricted
+    team: website-analytics
+spec:
+  replicationFactor: 3
+  partitions: 3
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+    min.insync.replicas: "2"

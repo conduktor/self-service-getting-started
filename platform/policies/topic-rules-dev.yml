@@ -1,0 +1,12 @@
+apiVersion: self-serve/v1
+kind: ResourcePolicy
+metadata:
+  name: topic-rules-dev
+spec:
+  targetKind: Topic
+  description: "Topic rules for dev instances"
+  rules:
+    - condition: spec.replicationFactor == 3
+      errorMessage: "Replication factor must be exactly 3"
+    - condition: spec.partitions >= 1 && spec.partitions <= 3
+      errorMessage: "Partition count has to be between 1 and 3"

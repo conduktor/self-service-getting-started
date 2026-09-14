@@ -1,0 +1,10 @@
+# The Application is the unit of ownership. Everything the website-analytics team
+# manages hangs off this, and spec.owner delegates it to a Console Group.
+apiVersion: self-serve/v1
+kind: Application
+metadata:
+  name: website-analytics
+spec:
+  title: "Website Analytics"
+  description: "Clickstream and page-view events from the company website"
+  owner: "website-analytics-owners" # Console Group technical-id

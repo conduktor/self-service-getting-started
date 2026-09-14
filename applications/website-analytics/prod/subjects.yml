@@ -1,0 +1,11 @@
+# Schema Registry subjects owned by website-analytics-prod.
+---
+apiVersion: kafka/v2
+kind: Subject
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.prod.page-views-value
+spec:
+  schemaFile: applications/website-analytics/prod/schemas/page-views-value.avsc
+  format: AVRO
+  compatibility: FULL_TRANSITIVE

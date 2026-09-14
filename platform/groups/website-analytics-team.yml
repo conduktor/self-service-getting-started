@@ -1,0 +1,36 @@
+# Console Groups mirror groups from your identity provider.
+# An Application's spec.owner points at one of these.
+---
+apiVersion: iam/v2
+kind: Group
+metadata:
+  name: website-analytics-owners
+spec:
+  displayName: "Website Analytics Owners"
+  description: "Owners of the website-analytics application"
+  members:
+    - alice@conduktor.io
+  externalGroups:
+    - website-analytics-owners
+---
+apiVersion: iam/v2
+kind: Group
+metadata:
+  name: website-analytics-devs
+spec:
+  displayName: "Website Analytics Developers"
+  description: "Developers on the website-analytics team"
+  members:
+    - bob@conduktor.io
+  externalGroups:
+    - website-analytics-devs
+---
+apiVersion: iam/v2
+kind: Group
+metadata:
+  name: support-team
+spec:
+  displayName: "Support"
+  description: "Support engineers, read-only across applications"
+  externalGroups:
+    - support-team

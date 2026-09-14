@@ -1,0 +1,31 @@
+# The prod instance of website-analytics.
+#
+# Same application, same team, stricter rules: note topic-rules-prod in place of
+# topic-rules-dev. That single line is the difference between "do what you like"
+# and "replication factor 3, min.insync.replicas 2, retention explicitly set".
+apiVersion: self-serve/v1
+kind: ApplicationInstance
+metadata:
+  application: website-analytics
+  name: website-analytics-prod
+spec:
+  cluster: "kafka-local"
+  serviceAccount: "sa-website-analytics-prod"
+  policyRef:
+    - topic-naming
+    - topic-labels
+    - topic-rules-prod
+    - subject-rules
+    - connector-rules
+    - appgroup-restrictions
+  defaultCatalogVisibility: PUBLIC
+  resources:
+    - type: TOPIC
+      patternType: PREFIXED
+      name: "website-analytics.prod."
+    - type: CONSUMER_GROUP
+      patternType: PREFIXED
+      name: "website-analytics.prod."
+    - type: SUBJECT
+      patternType: PREFIXED
+      name: "website-analytics.prod."

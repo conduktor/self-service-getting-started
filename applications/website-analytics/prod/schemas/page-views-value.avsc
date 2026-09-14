@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "namespace": "io.conduktor.websiteanalytics",
+  "name": "PageView",
+  "fields": [
+    { "name": "session_id", "type": "string" },
+    { "name": "url", "type": "string" },
+    { "name": "referrer", "type": ["null", "string"], "default": null },
+    { "name": "viewed_at", "type": { "type": "long", "logicalType": "timestamp-millis" } }
+  ]
+}

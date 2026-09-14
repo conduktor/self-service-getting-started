@@ -1,0 +1,13 @@
+# Schema Registry subjects owned by website-analytics-dev.
+# subject-rules requires a -key or -value suffix and an explicit compatibility level.
+---
+apiVersion: kafka/v2
+kind: Subject
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.dev.page-views-value
+spec:
+  # Path is relative to where you run the Conduktor CLI.
+  schemaFile: applications/website-analytics/dev/schemas/page-views-value.avsc
+  format: AVRO
+  compatibility: BACKWARD

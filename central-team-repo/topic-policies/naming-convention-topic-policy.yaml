@@ -1,9 +1,0 @@
-apiVersion: "v1"
-kind: "TopicPolicy"
-metadata:
-  name: naming-convention-topic-policy
-spec:
-  policies:
-    metadata.name:
-      constraint: Match
-      pattern: ^[a-z][a-z0-9.-]+$

@@ -1,135 +1,229 @@
-services:  
-  
-  conduktor-ctl:
-    image: conduktor/conduktor-ctl:v0.5.0
-    container_name: conduktor-ctl
-    entrypoint: sleep infinity # override entry point to keep container up
-    volumes:
-      - ./:/self-service
-    environment:
-      CDK_BASE_URL: "http://conduktor-console:8080"
-      CDK_API_KEY: "" # generate me from the UI for the demo, CLI also available
+x-broker-properties: &broker-common-configs
+  KAFKA_PROCESS_ROLES: broker
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "DOCKER:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT"
+  KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+  KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  KAFKA_CONTROLLER_QUORUM_VOTERS: "0@kafka-controller:9095"
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  KAFKA_HEAP_OPTS: "-Xmx512M -Xms512M"
+  KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
+  KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+  KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
+  KAFKA_LISTENER_NAME_CONTROLLER_SASL_ENABLED_MECHANISMS: PLAIN
+  KAFKA_LISTENER_NAME_CONTROLLER_PLAIN_SASL_JAAS_CONFIG: |
+    org.apache.kafka.common.security.plain.PlainLoginModule required \
+    username="admin" \
+    password="admin-secret" \
+    user_admin="admin-secret";
+  KAFKA_LISTENER_NAME_DOCKER_SASL_ENABLED_MECHANISMS: PLAIN
+  # The two service accounts below back the website-analytics application instances.
+  # Conduktor creates ACLs for these principals; declaring them here makes them real
+  # SASL users so you can actually produce and consume as the application.
+  KAFKA_LISTENER_NAME_DOCKER_PLAIN_SASL_JAAS_CONFIG:
+    org.apache.kafka.common.security.plain.PlainLoginModule required \
+    username="admin" \
+    password="admin-secret" \
+    user_admin="admin-secret" \
+    user_sa-website-analytics-dev="dev-secret" \
+    user_sa-website-analytics-prod="prod-secret";
+  KAFKA_SASL_JAAS_CONFIG:
+    org.apache.kafka.common.security.plain.PlainLoginModule required \
+    username="admin" \
+    password="admin-secret";
+  KAFKA_SUPER_USERS: "User:admin"
 
-  postgresql:
-    image: postgres:16
-    hostname: postgresql
-    volumes:
-      - pg_data_ss:/var/lib/postgresql/data
+services:
+  postgres:
+    image: postgres:15.1
+    restart: always
     environment:
-      PGDATA: "/var/lib/postgresql/data"
-      POSTGRES_DB: "conduktor-console"
-      POSTGRES_USER: "conduktor"
-      POSTGRES_PASSWORD: "change_me"
-      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+      POSTGRES_PASSWORD: pwd
 
   conduktor-console:
-    container_name: conduktor-console
-    image: conduktor/conduktor-console:1.33.0
-    depends_on:
-      - postgresql
-      - redpanda-0
+    image: conduktor/conduktor-console:1.47.1
+    hostname: console
+    container_name: console
     ports:
-      - "8080:8080"
+      - 8080:8080
     volumes:
-      - conduktor_data_ss:/var/conduktor
+      - ./console-config.yaml:/opt/conduktor/console-config.yaml
     environment:
-      CDK_DATABASE_URL: "postgresql://conduktor:change_me@postgresql:5432/conduktor-console"
-      CDK_ADMIN_EMAIL: "admin@conduktor.io"
-      CDK_ADMIN_PASSWORD: "adminP4ss!"
-      CDK_ORGANIZATION_NAME: "stu-conduktor-general"
-      CDK_AUTH_LOCAL-USERS_0_EMAIL: "alice@conduktor.io"
-      CDK_AUTH_LOCAL-USERS_0_PASSWORD: "aliceP4ss!"
-      CDK_AUTH_LOCAL-USERS_1_EMAIL: "bob@conduktor.io"
-      CDK_AUTH_LOCAL-USERS_1_PASSWORD: "bobP4ss!"
-      CDK_CLUSTERS_0_ID: "dev-cluster"
-      CDK_CLUSTERS_0_NAME: "dev-cluster"
-      CDK_CLUSTERS_0_BOOTSTRAPSERVERS: "redpanda-1:9093"
-      CDK_CLUSTERS_0_SCHEMAREGISTRY_URL: "http://redpanda-1:18084"
-      CDK_CLUSTERS_0_COLOR: "#E6702F"
-      CDK_CLUSTERS_0_ICON: "elephant"
-      CDK_CLUSTERS_1_ID: "prod-cluster"
-      CDK_CLUSTERS_1_NAME: "prod-cluster"
-      CDK_CLUSTERS_1_BOOTSTRAPSERVERS: "redpanda-0:9092"
-      CDK_CLUSTERS_1_SCHEMAREGISTRY_URL: "http://redpanda-0:18081"
-      CDK_CLUSTERS_1_COLOR: "#6A57C8"
-      CDK_CLUSTERS_1_ICON: "kafka"
+      CDK_IN_CONF_FILE: /opt/conduktor/console-config.yaml
+      # Self-service is a licensed feature. Without a license Console runs on the Free
+      # plan and every Self-service API call returns 403.
+      CDK_LICENSE: ${CDK_LICENSE:-}
       CDK_MONITORING_CORTEX-URL: http://conduktor-monitoring:9009/
       CDK_MONITORING_ALERT-MANAGER-URL: http://conduktor-monitoring:9010/
-      CDK_MONITORING_CALLBACK-URL: http://conduktor-console:8080/monitoring/api/
+      CDK_MONITORING_CALLBACK-URL: http://console:8080/monitoring/api/
       CDK_MONITORING_NOTIFICATIONS-CALLBACK-URL: http://localhost:8080
-  
-  conduktor-monitoring:
-    image: conduktor/conduktor-console-cortex:1.33.0
-    container_name: monitoring
-    environment:
-      CDK_CONSOLE-URL: "http://conduktor-console:8080"
-  
-  redpanda-0:
-    command:
-      - redpanda
-      - start
-      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
-      - --advertise-kafka-addr internal://redpanda-0:9092,external://localhost:19092
-      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
-      # Address the broker advertises to clients that connect to the HTTP Proxy.
-      - --advertise-pandaproxy-addr internal://redpanda-0:8082,external://localhost:18082
-      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
-      # Redpanda brokers use the RPC API to communicate with eachother internally.
-      - --rpc-addr redpanda-0:33145
-      - --advertise-rpc-addr redpanda-0:33145
-      - --smp 1
-      - --memory 1G
-      - --mode dev-container
-      - --default-log-level=info
-    image: docker.redpanda.com/redpandadata/redpanda:v24.1.9
-    container_name: redpanda-0
-    volumes:
-      - redpanda-0:/var/lib/redpanda/data
-    ports:
-      - 18081:18081
-      - 18082:18082
-      - 19092:19092
-      - 19644:9644
-    healthcheck:
-      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
-      interval: 15s
-      timeout: 3s
-      retries: 5
-      start_period: 5s
-      
-  redpanda-1:
-    command:
-      - redpanda
-      - start
-      - --kafka-addr internal://0.0.0.0:9093,external://0.0.0.0:19093
-      - --advertise-kafka-addr internal://redpanda-1:9093,external://localhost:19093
-      - --pandaproxy-addr internal://0.0.0.0:8083,external://0.0.0.0:18083
-      - --advertise-pandaproxy-addr internal://redpanda-1:8083,external://localhost:18083
-      - --schema-registry-addr internal://0.0.0.0:8084,external://0.0.0.0:18084
-      - --rpc-addr redpanda-1:33146
-      - --advertise-rpc-addr redpanda-1:33146
-      - --smp 1
-      - --memory 1G
-      - --mode dev-container
-      - --default-log-level=info
-    image: docker.redpanda.com/redpandadata/redpanda:v24.1.6
-    container_name: redpanda-1
-    volumes:
-      - redpanda-1:/var/lib/redpanda/data
-    ports:
-      - 18083:18083
-      - 18084:18084
-      - 19093:19093
-      - 19645:9645
-    healthcheck:
-      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true' || exit 1"]
-      interval: 15s
-      timeout: 3s
-      retries: 5
-      start_period: 5s
+    depends_on:
+      postgres:
+        condition: service_started
 
-volumes:
-  pg_data_ss: {}
-  conduktor_data_ss: {}
-  redpanda-0: {}
-  redpanda-1: {}
+  conduktor-monitoring:
+    hostname: conduktor-monitoring
+    image: conduktor/conduktor-console-cortex:1.19.0
+    environment:
+      CDK_CONSOLE-URL: "http://console:8080"
+
+  kafka-controller:
+    image: apache/kafka:4.0.0
+    hostname: kafka-controller
+    container_name: kafka-controller
+    environment:
+      KAFKA_NODE_ID: 0
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_LISTENERS: "CONTROLLER://kafka-controller:9095"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:SASL_PLAINTEXT,DOCKER:SASL_PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      KAFKA_LISTENER_NAME_CONTROLLER_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
+      KAFKA_LISTENER_NAME_CONTROLLER_PLAIN_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.plain.PlainLoginModule required \
+        username="admin" \
+        password="admin-secret" \
+        user_admin="admin-secret";
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka-controller:9095
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_SUPER_USERS: "User:admin"
+      KAFKA_HEAP_OPTS: "-Xmx512M -Xms512M"
+    healthcheck:
+      test: nc -zv kafka-controller 9095 || exit 1
+      interval: 2s
+      retries: 25
+
+  kafka-1:
+    image: apache/kafka:4.0.0
+    hostname: kafka-1
+    container_name: kafka-1
+    environment:
+      <<: *broker-common-configs
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: "DOCKER://kafka-1:9092"
+      KAFKA_ADVERTISED_LISTENERS: "DOCKER://kafka-1:9092"
+    healthcheck:
+      test: nc -zv kafka-1 9092 || exit 1
+      interval: 5s
+      retries: 25
+    depends_on:
+      kafka-controller:
+        condition: service_healthy
+
+  kafka-2:
+    image: apache/kafka:4.0.0
+    hostname: kafka-2
+    container_name: kafka-2
+    environment:
+      <<: *broker-common-configs
+      KAFKA_NODE_ID: 2
+      KAFKA_LISTENERS: "DOCKER://kafka-2:9092"
+      KAFKA_ADVERTISED_LISTENERS: "DOCKER://kafka-2:9092"
+    healthcheck:
+      test: nc -zv kafka-2 9092 || exit 1
+      interval: 5s
+      retries: 25
+    depends_on:
+      kafka-controller:
+        condition: service_healthy
+
+  kafka-3:
+    image: apache/kafka:4.0.0
+    hostname: kafka-3
+    container_name: kafka-3
+    environment:
+      <<: *broker-common-configs
+      KAFKA_NODE_ID: 3
+      KAFKA_LISTENERS: "DOCKER://kafka-3:9092"
+      KAFKA_ADVERTISED_LISTENERS: "DOCKER://kafka-3:9092"
+    healthcheck:
+      test: nc -zv kafka-3 9092 || exit 1
+      interval: 5s
+      retries: 25
+    depends_on:
+      kafka-controller:
+        condition: service_healthy
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.8.0
+    hostname: schema-registry
+    container_name: schema-registry
+    ports:
+      - 8081:8081
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "SASL_PLAINTEXT://kafka-1:9092,SASL_PLAINTEXT://kafka-2:9092,SASL_PLAINTEXT://kafka-3:9092"
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: PLAIN
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 3
+    healthcheck:
+      test: curl --fail --silent http://localhost:8081/subjects --output /dev/null || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
+
+  conduktor-gateway:
+    image: conduktor/conduktor-gateway:3.18.0
+    hostname: conduktor-gateway
+    container_name: conduktor-gateway
+    ports:
+      - 8888:8888
+      - 9092-9095:19092-19095
+    environment:
+      GATEWAY_LICENSE_KEY: ${CDK_LICENSE:-}
+      GATEWAY_MIN_BROKERID: 1
+      GATEWAY_SECURITY_MODE: KAFKA_MANAGED
+      GATEWAY_FEATURE_FLAGS_INTERNAL_LOAD_BALANCING: "false"
+
+      KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+      KAFKA_SASL_MECHANISM: PLAIN
+      KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+
+      # Docker listener - for services inside the Docker network
+      GATEWAY_LISTENER_DOCKER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      GATEWAY_LISTENER_DOCKER_ROUTING: port
+      GATEWAY_LISTENER_DOCKER_PORTS: 9092-9095
+      GATEWAY_LISTENER_DOCKER_ADVERTISED_HOST: conduktor-gateway
+
+      # Laptop listener - for access from outside the Docker network (localhost)
+      GATEWAY_LISTENER_LAPTOP_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      GATEWAY_LISTENER_LAPTOP_ROUTING: port
+      GATEWAY_LISTENER_LAPTOP_PORTS: 9092-9095:19092-19095
+      GATEWAY_LISTENER_LAPTOP_ADVERTISED_HOST: localhost
+    healthcheck:
+      test: curl --fail --silent http://localhost:8888/health/ready --output /dev/null || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+      kafka-2:
+        condition: service_healthy
+      kafka-3:
+        condition: service_healthy
+
+  conduktor-ctl:
+    image: conduktor/conduktor-ctl:v0.9.2
+    container_name: conduktor-ctl
+    entrypoint: sleep infinity # keep the container up so you can exec into it
+    volumes:
+      - ./:/self-service
+    working_dir: /self-service
+    environment:
+      CDK_BASE_URL: "http://console:8080"
+      CDK_API_KEY: ${CDK_API_KEY:-} # generate this from the Console UI, see the README
