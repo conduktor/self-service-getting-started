@@ -69,12 +69,23 @@ export CDK_LICENSE=<your-license-key>
 ./start.sh
 ```
 
-Console comes up at [http://localhost:8080](http://localhost:8080). Log in as
-`admin@conduktor.io` / `adminP4ss!`.
+`start.sh` returns once Console is ready at [http://localhost:8080](http://localhost:8080).
+Log in as `admin@conduktor.io` / `adminP4ss!`.
 
-Then follow the [quick start guide](https://docs.conduktor.io/guide/tutorials/get-started-with-self-service),
+Then open a shell in the CLI container and mint an admin token. The container already has
+`CDK_USER` and `CDK_PASSWORD` set, so there's no key to copy out of the UI:
+
+```bash
+docker compose exec -it conduktor-ctl /bin/sh
+
+export ADMIN_TOKEN=$(conduktor token create admin quickstart)
+export CDK_API_KEY=$ADMIN_TOKEN
+```
+
+From there, follow the [quick start guide](https://docs.conduktor.io/guide/tutorials/get-started-with-self-service),
 which walks through applying the platform resources, applying the application team's
-resources, and watching a policy reject a topic that breaks the rules.
+resources, watching a policy reject a topic that breaks the rules, and granting an
+approved exception.
 
 Tear down with `./stop.sh`.
 

@@ -57,6 +57,12 @@ services:
       CDK_MONITORING_ALERT-MANAGER-URL: http://conduktor-monitoring:9010/
       CDK_MONITORING_CALLBACK-URL: http://console:8080/monitoring/api/
       CDK_MONITORING_NOTIFICATIONS-CALLBACK-URL: http://localhost:8080
+    healthcheck:
+      test: curl --fail --silent http://localhost:8080/api/health/live --output /dev/null || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
     depends_on:
       postgres:
         condition: service_started
@@ -147,7 +153,7 @@ services:
         condition: service_healthy
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:7.8.0
+    image: confluentinc/cp-schema-registry:8.2.0
     hostname: schema-registry
     container_name: schema-registry
     ports:
@@ -226,4 +232,11 @@ services:
     working_dir: /self-service
     environment:
       CDK_BASE_URL: "http://console:8080"
-      CDK_API_KEY: ${CDK_API_KEY:-} # generate this from the Console UI, see the README
+      # `conduktor token create admin` uses these to mint your first admin token,
+      # so there's no key to copy out of the UI. Every other command reads
+      # CDK_API_KEY, which you export inside the container.
+      CDK_USER: "admin@conduktor.io"
+      CDK_PASSWORD: "adminP4ss!"
+    depends_on:
+      conduktor-console:
+        condition: service_healthy

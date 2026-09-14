@@ -1,6 +1,6 @@
 # The Kafka cluster the platform team manages, declared as code.
 #
-# In a real repo the credentials would be ${VAR} placeholders resolved from your
+# In a real repo the credentials would be environment variables resolved from your
 # CI secret store at apply time. They're inline here so the quick start runs
 # with no extra setup.
 ---
@@ -22,3 +22,7 @@ spec:
     type: "ConfluentLike"
     url: "http://schema-registry:8081"
     ignoreUntrustedCertificate: false
+    security:
+      type: BasicAuth
+      username: some_user
+      password: some_password
