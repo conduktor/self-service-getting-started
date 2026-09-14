@@ -35,7 +35,7 @@ x-broker-properties: &broker-common-configs
 
 services:
   postgres:
-    image: postgres:15.1
+    image: postgres:18
     restart: always
     environment:
       POSTGRES_PASSWORD: pwd
