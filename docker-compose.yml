@@ -39,6 +39,12 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: pwd
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
 
   conduktor-console:
     image: conduktor/conduktor-console:1.47.1
@@ -65,7 +71,7 @@ services:
       start_period: 30s
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
 
   conduktor-monitoring:
     hostname: conduktor-monitoring
