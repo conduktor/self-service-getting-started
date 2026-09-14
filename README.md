@@ -54,9 +54,15 @@ belongs to the application team — in a real repo, enforced with CODEOWNERS.
 | `connector-rules` | Connector | Restricts plugin classes, `tasks.max` <= 8 |
 | `appgroup-restrictions` | ApplicationGroup | No direct members, read-only prod topic access |
 
-Policies do nothing on their own. They apply because `spec.policyRef` on each
-ApplicationInstance names them. The dev and prod instances are identical except for which
-topic policy they reference — that one line is the whole dev-versus-prod story.
+Policies do nothing on their own. They apply because something references them. The first
+six are named by `spec.policyRef` on each ApplicationInstance; the dev and prod instances
+are identical except for which topic policy they reference, and that one line is the whole
+dev-versus-prod story.
+
+`appgroup-restrictions` is referenced from `application.yml` instead. An ApplicationInstance's
+`spec.policyRef` accepts only `Topic`, `Connector` and `Subject` policies — an
+`ApplicationGroup` policy has to attach at the Application level, where it covers every
+instance.
 
 ## Running it
 
