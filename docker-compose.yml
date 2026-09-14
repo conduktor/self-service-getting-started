@@ -231,12 +231,11 @@ services:
       - ./:/self-service
     working_dir: /self-service
     environment:
+      # Only the Console URL lives here. Credentials and tokens are passed per
+      # command with `docker compose exec -e`, so nothing sensitive is baked into
+      # this file and CDK_USER never coexists with CDK_API_KEY — the CLI rejects
+      # that combination outright when CDK_AUTH_MODE is `external`.
       CDK_BASE_URL: "http://console:8080"
-      # `conduktor token create admin` uses these to mint your first admin token,
-      # so there's no key to copy out of the UI. Every other command reads
-      # CDK_API_KEY, which you export inside the container.
-      CDK_USER: "admin@conduktor.io"
-      CDK_PASSWORD: "adminP4ss!"
     depends_on:
       conduktor-console:
         condition: service_healthy

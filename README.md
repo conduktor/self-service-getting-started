@@ -72,15 +72,25 @@ export CDK_LICENSE=<your-license-key>
 `start.sh` returns once Console is ready at [http://localhost:8080](http://localhost:8080).
 Log in as `admin@conduktor.io` / `adminP4ss!`.
 
-Then open a shell in the CLI container and mint an admin token. The container already has
-`CDK_USER` and `CDK_PASSWORD` set, so there's no key to copy out of the UI:
+Mint an admin token, then open a shell in the CLI container with it. `conduktor token
+create admin` logs in with `CDK_USER`/`CDK_PASSWORD` to create your first token, so there's
+no key to copy out of the UI — and passing them to that one command keeps credentials out
+of `docker-compose.yml`:
 
 ```bash
-docker compose exec -it conduktor-ctl /bin/sh
+ADMIN_TOKEN=$(docker compose exec -T \
+  -e CDK_USER=admin@conduktor.io \
+  -e CDK_PASSWORD='adminP4ss!' \
+  conduktor-ctl conduktor token create admin quickstart)
 
-export ADMIN_TOKEN=$(conduktor token create admin quickstart)
-export CDK_API_KEY=$ADMIN_TOKEN
+docker compose exec -it \
+  -e CDK_API_KEY="$ADMIN_TOKEN" \
+  -e ADMIN_TOKEN="$ADMIN_TOKEN" \
+  conduktor-ctl /bin/sh
 ```
+
+Don't set `CDK_USER` on the container alongside `CDK_API_KEY`: with
+`CDK_AUTH_MODE=external` the CLI refuses to run when both are present.
 
 From there, follow the [quick start guide](https://docs.conduktor.io/guide/tutorials/get-started-with-self-service),
 which walks through applying the platform resources, applying the application team's
