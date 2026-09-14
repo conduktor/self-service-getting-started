@@ -15,7 +15,7 @@ metadata:
   description: |
     # Page views
     One event per page load, including referrer and session id.
-  descriptionIsEditable: "true"
+  descriptionIsEditable: true
 spec:
   replicationFactor: 3
   partitions: 3

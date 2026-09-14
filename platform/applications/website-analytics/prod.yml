@@ -17,7 +17,6 @@ spec:
     - topic-rules-prod
     - subject-rules
     - connector-rules
-    - appgroup-restrictions
   defaultCatalogVisibility: PUBLIC
   resources:
     - type: TOPIC

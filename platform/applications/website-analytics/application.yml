@@ -8,3 +8,7 @@ spec:
   title: "Website Analytics"
   description: "Clickstream and page-view events from the company website"
   owner: "website-analytics-owners" # Console Group technical-id
+  # ApplicationGroup policies attach here, not to an ApplicationInstance:
+  # spec.policyRef on an instance only accepts Topic, Connector and Subject policies.
+  policyRef:
+    - appgroup-restrictions
