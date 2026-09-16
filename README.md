@@ -4,10 +4,26 @@ A worked example of Conduktor Self-service you can run on a laptop. The full tut
 below; a narrated version lives at
 [docs.conduktor.io](https://docs.conduktor.io/guide/tutorials/get-started-with-self-service).
 
-The idea behind Self-service: the **platform team** defines boundaries — which application
-owns which resources, and what rules those resources have to follow. **Application teams**
-then manage their own topics, schemas and permissions inside those boundaries, without
-filing a ticket. Guardrails replace gatekeeping.
+## Why Self-service
+
+As Kafka adoption grows, central teams hit a tradeoff with no good answer. Review every
+resource request properly and you become the bottleneck: developers wait hours or days for a
+topic, and platform engineers spend their time on pull requests instead of upgrades,
+monitoring and capacity planning. Review fast enough to keep up and misconfigurations reach
+production. At five application teams careful review is manageable; at 20 it becomes a skim.
+
+Access requests are harder still, because the central team has to approve them without
+knowing whether the data is sensitive or who should see it. Approvals go through anyway,
+periodic reviews slip, and "who can read this topic?" turns into a multi-day search through
+ACLs, tickets and spreadsheets when an auditor or an incident asks.
+
+Self-service separates two decisions that were never the same decision. The **platform team**
+defines boundaries — which application owns which resources, and what rules those resources
+have to follow — then stops reviewing individual changes. **Application teams** manage their
+own topics, schemas and permissions inside those boundaries, and every change is validated at
+apply time with an error that names the policy and what to fix. Ops protects the
+infrastructure; the people with business context decide about their data. Guardrails replace
+gatekeeping.
 
 ## Repository structure
 
