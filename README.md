@@ -25,6 +25,22 @@ apply time with an error that names the policy and what to fix. Ops protects the
 infrastructure; the people with business context decide about their data. Guardrails replace
 gatekeeping.
 
+Ownership also compounds. Declaring which application owns which topics and service accounts
+builds a record the rest of Console reads:
+
+- [Stream lineage](https://docs.conduktor.io/guide/conduktor-concepts/stream-lineage)
+  resolves raw service account principals into named applications, so a graph of `sa-7f3a`
+  and `svc-prod-2` becomes a graph of teams.
+- [Chargeback](https://docs.conduktor.io/guide/conduktor-concepts/chargeback) rolls
+  infrastructure cost up by application and by application instance, because it can join
+  traffic back through the service account to the application that produced it.
+- [Alerts](https://docs.conduktor.io/guide/monitor-brokers-apps/alerts) belong to an
+  application instance, so the team that owns a topic sees and manages the alerts on it.
+- The Topic Catalog shows each topic's owner and which application instances subscribe to
+  it, which is what makes "who consumes this?" answerable before you change a schema.
+
+None of that comes from Kafka metadata alone. ACLs know principals, not teams.
+
 ## Repository structure
 
 ```
