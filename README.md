@@ -6,40 +6,18 @@ below; a narrated version lives at
 
 ## Why Self-service
 
-As Kafka adoption grows, central teams hit a tradeoff with no good answer. Review every
-resource request properly and you become the bottleneck: developers wait hours or days for a
-topic, and platform engineers spend their time on pull requests instead of upgrades,
-monitoring and capacity planning. Review fast enough to keep up and misconfigurations reach
-production. At five application teams careful review is manageable; at 20 it becomes a skim.
+As Kafka adoption grows, central teams hit a tradeoff: They can review every resource request properly and you become the bottleneck, or skim and allow misconfiugrations to reach production.
 
-Access requests are harder still, because the central team has to approve them without
-knowing whether the data is sensitive or who should see it. Approvals go through anyway,
-periodic reviews slip, and "who can read this topic?" turns into a multi-day search through
-ACLs, tickets and spreadsheets when an auditor or an incident asks.
+Access requests are even harder because the central team has to approve them without knowing whether the data is sensitive or who should see it. Approvals go through anyway, periodic reviews slip, and "who can read this topic?" turns into a multi-day search through ACLs, tickets and spreadsheets when an auditor or an incident asks. Teams that want isolation ask for their own cluster, so cluster count grows faster than the workload does.
 
-Self-service separates two decisions that were never the same decision. The **platform team**
-defines boundaries — which application owns which resources, and what rules those resources
-have to follow — then stops reviewing individual changes. **Application teams** manage their
-own topics, schemas and permissions inside those boundaries, and every change is validated at
-apply time with an error that names the policy and what to fix. Ops protects the
-infrastructure; the people with business context decide about their data. Guardrails replace
-gatekeeping.
+With Conduktor Self-Service, responsibility is federated. The platform team declares **each application's owner**, **what resources it owns**, and **what rules its resources have to follow**. Application teams **create, change, share, or delete their own resources** inside those boundaries. Conduktor Self-Service validates every change at apply time against the rules, with custom error messages to tell them what to fix. Ops protects the infrastructure while the developers with business context make decisions about their data.
 
-Ownership also compounds. Declaring which application owns which topics and service accounts
-builds a record the rest of Console reads:
+Moreover, having a proper ownership database turns out to be handy elsewhere in Console:
 
-- [Stream lineage](https://docs.conduktor.io/guide/conduktor-concepts/stream-lineage)
-  resolves raw service account principals into named applications, so a graph of `sa-7f3a`
-  and `svc-prod-2` becomes a graph of teams.
-- [Chargeback](https://docs.conduktor.io/guide/conduktor-concepts/chargeback) rolls
-  infrastructure cost up by application and by application instance, because it can join
-  traffic back through the service account to the application that produced it.
-- [Alerts](https://docs.conduktor.io/guide/monitor-brokers-apps/alerts) belong to an
-  application instance, so the team that owns a topic sees and manages the alerts on it.
-- The Topic Catalog shows each topic's owner and which application instances subscribe to
-  it, which is what makes "who consumes this?" answerable before you change a schema.
-
-None of that comes from Kafka metadata alone. ACLs know principals, not teams.
+- [Stream lineage](/guide/conduktor-concepts/stream-lineage) resolves raw service account principals into named applications, so a graph of `sa-7f3a` and `svc-prod-2` becomes a graph of teams, with a view that hides everything Self-service doesn't manage.
+- [Chargeback](/guide/conduktor-concepts/chargeback) rolls infrastructure cost up by application and by application instance, because it can trace usage back through the service account to the application that produced it.
+- [Alerts](/guide/monitor-brokers-apps/alerts) belong to an application instance, so the team that owns a topic sees and manages the alerts on it.
+- The Topic Catalog shows each topic's owner, schema, and documentation, allowing teams to maintain proper data products other teams can discover and use.
 
 ## Repository structure
 
