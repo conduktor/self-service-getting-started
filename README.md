@@ -6,17 +6,17 @@ below; a narrated version lives at
 
 ## Why Self-service
 
-As Kafka adoption grows, central teams hit a tradeoff: They can review every resource request properly and you become the bottleneck, or skim and allow misconfiugrations to reach production.
+As Kafka adoption grows, central teams hit a tradeoff: they review every resource request properly and become the bottleneck, or they skim and let misconfigurations reach production.
 
 Access requests are even harder because the central team has to approve them without knowing whether the data is sensitive or who should see it. Approvals go through anyway, periodic reviews slip, and "who can read this topic?" turns into a multi-day search through ACLs, tickets and spreadsheets when an auditor or an incident asks. Teams that want isolation ask for their own cluster, so cluster count grows faster than the workload does.
 
-With Conduktor Self-Service, responsibility is federated. The platform team declares **each application's owner**, **what resources it owns**, and **what rules its resources have to follow**. Application teams **create, change, share, or delete their own resources** inside those boundaries. Conduktor Self-Service validates every change at apply time against the rules, with custom error messages to tell them what to fix. Ops protects the infrastructure while the developers with business context make decisions about their data.
+With Conduktor Self-service, responsibility is federated. The platform team declares **each application's owner**, **what resources it owns**, and **what rules its resources have to follow**. Application teams **create, change, share, or delete their own resources** inside those boundaries. Conduktor Self-service validates every change at apply time against the rules, with custom error messages to tell them what to fix. Ops protects the infrastructure while the developers with business context make decisions about their data.
 
 Moreover, having a proper ownership database turns out to be handy elsewhere in Console:
 
-- [Stream lineage](/guide/conduktor-concepts/stream-lineage) resolves raw service account principals into named applications, so a graph of `sa-7f3a` and `svc-prod-2` becomes a graph of teams, with a view that hides everything Self-service doesn't manage.
-- [Chargeback](/guide/conduktor-concepts/chargeback) rolls infrastructure cost up by application and by application instance, because it can trace usage back through the service account to the application that produced it.
-- [Alerts](/guide/monitor-brokers-apps/alerts) belong to an application instance, so the team that owns a topic sees and manages the alerts on it.
+- [Stream lineage](https://docs.conduktor.io/guide/conduktor-concepts/stream-lineage) resolves raw service account principals into named applications, so a graph of `sa-7f3a` and `svc-prod-2` becomes a graph of teams, with a view that hides everything Self-service doesn't manage.
+- [Chargeback](https://docs.conduktor.io/guide/conduktor-concepts/chargeback) rolls infrastructure cost up by application and by application instance, because it can trace usage back through the service account to the application that produced it.
+- [Alerts](https://docs.conduktor.io/guide/monitor-brokers-apps/alerts) belong to an application instance, so the team that owns a topic sees and manages the alerts on it.
 - The Topic Catalog shows each topic's owner, schema, and documentation, allowing teams to maintain proper data products other teams can discover and use.
 
 ## Repository structure
@@ -59,15 +59,16 @@ belongs to the application team — in a real repo, enforced with CODEOWNERS.
 | `topic-naming` | Topic | Enforces `<app>.<descriptive-name>` naming |
 | `topic-labels` | Topic | Requires `instance`, `business-unit`, `confidentiality`, `team` labels |
 | `topic-rules-dev` | Topic | Dev rules (RF = 3, partitions 1-3) |
-| `topic-rules-prod` | Topic | Strict prod rules (RF = 3, partitions <= 12, retention >= 1h, ISR >= 2) |
+| `topic-rules-prod` | Topic | Strict prod rules (RF = 3, partitions 1-12, retention >= 1h, ISR >= 2) |
 | `subject-rules` | Subject | Requires `-key` or `-value` suffix, explicit compatibility |
-| `connector-rules` | Connector | Restricts plugin classes, `tasks.max` <= 8 |
-| `appgroup-restrictions` | ApplicationGroup | No direct members, read-only prod topic access |
+| `connector-rules` | Connector | Restricts plugin classes, `tasks.max` up to 8 |
+| `appgroup-restrictions` | ApplicationGroup | No direct members; on prod instances, only consume, view config and manage data quality |
 
 Policies do nothing on their own. They apply because something references them. The first
-six are named by `spec.policyRef` on each ApplicationInstance; the dev and prod instances
-are identical except for which topic policy they reference, and that one line is the whole
-dev-versus-prod story.
+six are named by `spec.policyRef` on each ApplicationInstance. The dev and prod instances
+have the same shape, each with its own name, service account and resource prefixes, and they
+differ by which topic policy they reference — that one line is the whole dev-versus-prod
+story.
 
 `appgroup-restrictions` is referenced from `application.yml` instead. An ApplicationInstance's
 `spec.policyRef` accepts only `Topic`, `Connector` and `Subject` policies — an
@@ -91,10 +92,10 @@ export CDK_LICENSE=<your-license-key>
 ./start.sh
 ```
 
-This brings up Console, a three-broker Kafka cluster, Schema Registry, Conduktor Gateway and
-the Conduktor CLI, and returns once Console is ready at
-[http://localhost:8080](http://localhost:8080). Log in as `admin@conduktor.io` /
-`adminP4ss!` to watch resources appear as you create them.
+This brings up Console with its Postgres and monitoring containers, a three-broker Kafka
+cluster, Schema Registry, Conduktor Gateway and the Conduktor CLI. It returns once every
+container is healthy. Log in at [http://localhost:8080](http://localhost:8080) as
+`admin@conduktor.io` / `adminP4ss!` to watch resources appear as you create them.
 
 ## 2. Mint an admin token
 
@@ -113,8 +114,8 @@ ADMIN_TOKEN=$(docker compose exec -T \
 the token.
 
 > Every command below passes its token with `-e CDK_API_KEY=...`. Don't set `CDK_USER` on
-> the container alongside `CDK_API_KEY` — under `CDK_AUTH_MODE=external` the CLI refuses to
-> run when both are present.
+> the container alongside `CDK_API_KEY` — whatever the auth mode, the CLI refuses to run when
+> both are present and exits with `Can't set both CDK_USER and CDK_API_KEY`.
 
 ## 3. Apply the platform team's resources
 
@@ -122,7 +123,8 @@ Setting up the cluster, the groups, the guardrails and the application boundarie
 platform team's job. Order matters — each step references the one before it.
 
 ```bash
-# The Kafka cluster is a managed resource, not something configured by hand in the UI
+# Registers kafka-local and the Gateway in front of it. A cluster is itself a managed
+# resource, not something configured by hand in the UI
 docker compose exec -e CDK_API_KEY=$ADMIN_TOKEN conduktor-ctl \
   conduktor apply -f platform/clusters/
 
@@ -152,18 +154,26 @@ spec:
     - topic-rules-prod
     - subject-rules
     - connector-rules
+  defaultCatalogVisibility: PUBLIC
   resources:                  # <-- the boundary
     - type: TOPIC
       patternType: PREFIXED
       name: "website-analytics.prod."
+    - type: CONSUMER_GROUP
+      patternType: PREFIXED
+      name: "website-analytics.prod."
+    - type: SUBJECT
+      patternType: PREFIXED
+      name: "website-analytics.prod."
 ```
 
-`resources` is the boundary: this application instance can do what it likes to anything
-matching `website-analytics.prod.`, and nothing at all outside it. `policyRef` is the
-guardrail: every resource it applies is validated against those policies first.
+`resources` is the boundary: this application instance can do what it likes to any topic,
+consumer group or subject matching `website-analytics.prod.`, and nothing at all outside it.
+`policyRef` is the guardrail: every resource it applies is validated against those policies
+first.
 
-Policies and applications are now visible in Console under **Resource Policies** and the
-**Applications Catalog**. Delegation is complete — everything from here is the application
+Policies and applications are now visible in Console under **Resource policies** and the
+**Application Catalog**. Delegation is complete — everything from here is the application
 team's work.
 
 ## 4. Apply the application team's resources
@@ -226,11 +236,14 @@ docker compose exec -e CDK_API_KEY=$APP_TOKEN conduktor-ctl \
 ```
 
 ```
+Applying resources
 Could not apply resource Topic/website-analytics.prod.replay: Policies check failed:
 - topic-rules-prod: Production topics need less than or equal to 12 partitions. If you need an exception, plead your case to the platform team.
+Error: one or more resources could not be applied
 ```
 
-The rejection carries the `errorMessage` the platform team wrote, so the developer knows
+The CLI exits non-zero, so a pipeline stops here. The rejection carries the `errorMessage`
+the platform team wrote, so the developer knows
 both what broke and what to do next. Failures are grouped by policy; a resource that breaks
 several rules reports all of them at once.
 
@@ -243,8 +256,14 @@ Try a few variations to get a feel for the guardrails:
 - Rename the topic to `payments.replay` — `website-analytics-prod` doesn't own that prefix,
   so the boundary rejects it before any policy runs.
 - Drop the `confidentiality` label — `topic-labels` rejects it.
-- Apply the same topic against the **dev** instance with 24 partitions — `topic-rules-dev`
-  caps dev at 3.
+- Move the same topic to the **dev** instance, keeping 24 partitions: rename it to
+  `website-analytics.dev.replay`, set the `instance` label to `dev`, and mint a token for
+  `website-analytics-dev`. `topic-rules-dev` caps dev at three. Keep the `prod` name or the
+  `prod` token and you hit the ownership boundary instead, before any policy runs.
+- Re-apply `applications/website-analytics/<instance>/` with an application-instance token
+  rather than the admin one. Step 4 used the admin token, so none of those resources were
+  policy-checked; an application token runs them through the guardrails, including
+  `appgroup-restrictions` on the ApplicationGroups.
 
 ## 6. Grant a policy exception
 

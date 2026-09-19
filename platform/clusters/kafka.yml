@@ -22,6 +22,9 @@ spec:
     type: "ConfluentLike"
     url: "http://schema-registry:8081"
     ignoreUntrustedCertificate: false
+    # `security` is required by the API even when the registry doesn't enforce
+    # anything, which is the case for the local one here — these credentials are
+    # placeholders. Replace them to match what your registry actually checks.
     security:
       type: BasicAuth
       username: some_user

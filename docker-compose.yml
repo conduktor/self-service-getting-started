@@ -75,7 +75,7 @@ services:
 
   conduktor-monitoring:
     hostname: conduktor-monitoring
-    image: conduktor/conduktor-console-cortex:1.19.0
+    image: conduktor/conduktor-console-cortex:1.47.1
     environment:
       CDK_CONSOLE-URL: "http://console:8080"
 
@@ -187,7 +187,7 @@ services:
         condition: service_healthy
 
   conduktor-gateway:
-    image: conduktor/conduktor-gateway:3.18.0
+    image: conduktor/conduktor-gateway:3.21.1
     hostname: conduktor-gateway
     container_name: conduktor-gateway
     ports:
@@ -197,6 +197,9 @@ services:
       GATEWAY_LICENSE_KEY: ${CDK_LICENSE:-}
       GATEWAY_MIN_BROKERID: 1
       GATEWAY_SECURITY_MODE: KAFKA_MANAGED
+      # Required since 3.21 when listeners are configured explicitly. It has to be
+      # false here: Gateway can't manage ACLs while the brokers own authentication.
+      GATEWAY_ACL_ENABLED: "false"
       GATEWAY_FEATURE_FLAGS_INTERNAL_LOAD_BALANCING: "false"
 
       KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
@@ -239,8 +242,8 @@ services:
     environment:
       # Only the Console URL lives here. Credentials and tokens are passed per
       # command with `docker compose exec -e`, so nothing sensitive is baked into
-      # this file and CDK_USER never coexists with CDK_API_KEY — the CLI rejects
-      # that combination outright when CDK_AUTH_MODE is `external`.
+      # this file and CDK_USER never coexists with CDK_API_KEY — whatever the auth
+      # mode, the CLI rejects that combination outright.
       CDK_BASE_URL: "http://console:8080"
     depends_on:
       conduktor-console:
