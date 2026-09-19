@@ -1,0 +1,18 @@
+apiVersion: self-serve/v1
+kind: ResourcePolicy
+metadata:
+  name: topic-labels
+spec:
+  targetKind: Topic
+  description: "Enforces required labels on topics"
+  rules:
+    - condition: has(metadata.labels.instance) && metadata.labels["instance"] in ["dev", "stag", "prod"]
+      errorMessage: "Topics must have an 'instance' label set to one of: dev, stag, prod"
+    - condition: >
+        "business-unit" in metadata.labels
+        && metadata.labels["business-unit"].size() > 0
+      errorMessage: "Topics must have a 'business-unit' label (e.g., finance, logistics, risk)"
+    - condition: has(metadata.labels.confidentiality) && metadata.labels["confidentiality"] in ["public", "internal", "restricted"]
+      errorMessage: "Topics must have a 'confidentiality' label set to one of: public, internal, restricted"
+    - condition: has(metadata.labels.team) && metadata.labels["team"].size() > 0
+      errorMessage: "Topics must have a 'team' label identifying the owning team"

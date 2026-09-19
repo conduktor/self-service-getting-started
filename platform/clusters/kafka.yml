@@ -1,0 +1,31 @@
+# The Kafka cluster the platform team manages, declared as code.
+#
+# In a real repo the credentials would be environment variables resolved from your
+# CI secret store at apply time. They're inline here so the quick start runs
+# with no extra setup.
+---
+apiVersion: console/v2
+kind: KafkaCluster
+metadata:
+  name: kafka-local
+spec:
+  displayName: "Local Kafka"
+  icon: "kafka"
+  color: "#0013E7"
+  bootstrapServers: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
+  ignoreUntrustedCertificate: false
+  properties:
+    security.protocol: SASL_PLAINTEXT
+    sasl.mechanism: PLAIN
+    sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+  schemaRegistry:
+    type: "ConfluentLike"
+    url: "http://schema-registry:8081"
+    ignoreUntrustedCertificate: false
+    # `security` is required by the API even when the registry doesn't enforce
+    # anything, which is the case for the local one here — these credentials are
+    # placeholders. Replace them to match what your registry actually checks.
+    security:
+      type: BasicAuth
+      username: some_user
+      password: some_password

@@ -1,0 +1,18 @@
+# Uncomment to grant another team's application instance access to your topics.
+# This is how cross-team access happens without the platform team in the loop —
+# you own the topic, so you own the grant.
+#
+# apiVersion: self-serve/v1
+# kind: ApplicationInstancePermission
+# metadata:
+#   application: website-analytics
+#   appInstance: website-analytics-dev
+#   name: allow-heatmap-read-clicks
+# spec:
+#   resource:
+#     type: TOPIC
+#     name: "website-analytics.dev.clicks"
+#     patternType: LITERAL
+#   serviceAccountPermission: READ
+#   userPermission: NONE
+#   grantedTo: "heatmap-dev" # the other team's ApplicationInstance name

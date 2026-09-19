@@ -1,0 +1,31 @@
+# The dev instance of website-analytics.
+#
+# spec.resources is the boundary: the application team can create, change and
+# delete anything matching these patterns, and nothing else.
+# spec.policyRef is the guardrail: every resource they apply is validated
+# against these policies first.
+apiVersion: self-serve/v1
+kind: ApplicationInstance
+metadata:
+  application: website-analytics
+  name: website-analytics-dev
+spec:
+  cluster: "kafka-local"
+  serviceAccount: "sa-website-analytics-dev"
+  policyRef:
+    - topic-naming
+    - topic-labels
+    - topic-rules-dev
+    - subject-rules
+    - connector-rules
+  defaultCatalogVisibility: PUBLIC
+  resources:
+    - type: TOPIC
+      patternType: PREFIXED
+      name: "website-analytics.dev."
+    - type: CONSUMER_GROUP
+      patternType: PREFIXED
+      name: "website-analytics.dev."
+    - type: SUBJECT
+      patternType: PREFIXED
+      name: "website-analytics.dev."

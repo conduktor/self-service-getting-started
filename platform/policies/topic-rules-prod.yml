@@ -1,0 +1,16 @@
+apiVersion: self-serve/v1
+kind: ResourcePolicy
+metadata:
+  name: topic-rules-prod
+spec:
+  targetKind: Topic
+  description: "Strict topic rules for production environments"
+  rules:
+    - condition: spec.replicationFactor == 3
+      errorMessage: "Replication factor has to be exactly 3 in production"
+    - condition: spec.partitions >= 1 && spec.partitions <= 12
+      errorMessage: "Production topics need less than or equal to 12 partitions. If you need an exception, plead your case to the platform team."
+    - condition: "\"retention.ms\" in spec.configs && int(string(spec.configs[\"retention.ms\"])) >= 3600000"
+      errorMessage: "Retention has to be explicitly set and at least 1 hour in production"
+    - condition: "\"min.insync.replicas\" in spec.configs && int(string(spec.configs[\"min.insync.replicas\"])) >= 2"
+      errorMessage: "min.insync.replicas has to be at least 2 in production"

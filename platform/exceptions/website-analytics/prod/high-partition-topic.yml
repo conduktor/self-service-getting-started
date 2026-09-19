@@ -1,0 +1,28 @@
+# A policy exception.
+#
+# topic-rules-prod caps production topics at 12 partitions. The website-analytics
+# team needs 24 for their Black Friday replay job, and the platform team agreed.
+#
+# Applying this file with an *AdminToken* bypasses ResourcePolicy validation —
+# that's the whole mechanism. The application team can't apply it themselves with
+# their ApplicationInstanceToken, which is what makes it an exception rather than
+# a loophole. In a GitOps repo this directory is CODEOWNED by the platform team,
+# so granting an exception is a reviewed, auditable pull request.
+apiVersion: kafka/v2
+kind: Topic
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.prod.replay
+  labels:
+    instance: prod
+    business-unit: marketing
+    confidentiality: internal
+    team: website-analytics
+    exception-ticket: "PLAT-1234" # why this exists, and who approved it
+spec:
+  replicationFactor: 3
+  partitions: 24 # exceeds the 12-partition cap in topic-rules-prod
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+    min.insync.replicas: "2"

@@ -1,0 +1,20 @@
+database:
+  url: postgresql://postgres:pwd@postgres/postgres
+
+admin:
+  email: admin@conduktor.io
+  password: adminP4ss!
+
+# Two extra local users so you can log in as a member of the website-analytics team
+# and see what the application team sees.
+auth:
+  local-users:
+    - email: alice@conduktor.io
+      password: aliceP4ss!
+    - email: bob@conduktor.io
+      password: bobP4ss!
+
+# Note: no `clusters:` block here on purpose.
+# In this quick start the Kafka cluster is a *managed resource* — it's declared in
+# platform/clusters/ and applied with the Conduktor CLI, the same way the platform
+# team would manage it in a real GitOps repo.

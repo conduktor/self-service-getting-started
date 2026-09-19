@@ -1,0 +1,21 @@
+# Connectors are validated by the connector-rules policy, which caps tasks.max at 8
+# and restricts connector.class to an approved list.
+#
+# This quick start doesn't run a Kafka Connect cluster, so the resource below is
+# commented out. Register a KafkaConnectCluster in platform/clusters/ and uncomment
+# it to see connector-rules in action.
+#
+# apiVersion: kafka/v2
+# kind: Connector
+# metadata:
+#   name: website-analytics.prod.page-views-sink
+#   cluster: kafka-local
+#   connectCluster: connect-local
+#   labels:
+#     conduktor.io/auto-restart-enabled: "true"
+#     conduktor.io/auto-restart-frequency: "600"
+# spec:
+#   config:
+#     connector.class: com.amazonaws.kafka.connect.s3.S3SinkConnector
+#     tasks.max: "2"
+#     topics: website-analytics.prod.page-views

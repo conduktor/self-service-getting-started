@@ -1,0 +1,58 @@
+# Topics owned by website-analytics-dev.
+# Every one of these has to satisfy the policies on the dev application instance:
+# topic-naming, topic-labels and topic-rules-dev.
+---
+apiVersion: kafka/v2
+kind: Topic
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.dev.page-views
+  labels:
+    instance: dev
+    business-unit: marketing
+    confidentiality: internal
+    team: website-analytics
+  description: |
+    # Page views
+    One event per page load, including referrer and session id.
+  descriptionIsEditable: true
+spec:
+  replicationFactor: 3
+  partitions: 3
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+---
+apiVersion: kafka/v2
+kind: Topic
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.dev.clicks
+  labels:
+    instance: dev
+    business-unit: marketing
+    confidentiality: internal
+    team: website-analytics
+spec:
+  replicationFactor: 3
+  partitions: 3
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days
+---
+apiVersion: kafka/v2
+kind: Topic
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.dev.add-to-cart
+  labels:
+    instance: dev
+    business-unit: marketing
+    confidentiality: restricted
+    team: website-analytics
+spec:
+  replicationFactor: 3
+  partitions: 1
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000" # 7 days

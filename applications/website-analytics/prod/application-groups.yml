@@ -1,0 +1,24 @@
+# The same team, in production, gets read-only access through the UI.
+# That's not a convention — appgroup-restrictions enforces it: any permission
+# beyond consume / view config / manage data quality on a *-prod instance is
+# rejected at apply time.
+apiVersion: self-serve/v1
+kind: ApplicationGroup
+metadata:
+  application: website-analytics
+  name: website-analytics-prod-readers
+spec:
+  displayName: "Website Analytics Readers (prod)"
+  description: "Read-only access to website-analytics production topics"
+  members: []
+  externalGroups:
+    - website-analytics-devs
+    - support-team
+  permissions:
+    - appInstance: website-analytics-prod
+      resourceType: TOPIC
+      patternType: LITERAL
+      name: "*"
+      permissions:
+        - topicViewConfig
+        - topicConsume

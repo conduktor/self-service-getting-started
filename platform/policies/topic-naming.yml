@@ -1,0 +1,10 @@
+apiVersion: self-serve/v1
+kind: ResourcePolicy
+metadata:
+  name: topic-naming
+spec:
+  targetKind: Topic
+  description: "Enforces topic naming convention"
+  rules:
+    - condition: metadata.name.matches("^[a-z0-9-]+\\.[a-z0-9.-]+$")
+      errorMessage: "Topic name must follow the pattern <app>.<descriptive-name>"

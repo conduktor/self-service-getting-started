@@ -1,0 +1,15 @@
+apiVersion: self-serve/v1
+kind: ResourcePolicy
+metadata:
+  name: appgroup-restrictions
+spec:
+  targetKind: ApplicationGroup
+  description: "Enforces group-based membership and restricts production permissions"
+  rules:
+    - condition: "!has(spec.members) || spec.members.size() == 0"
+      errorMessage: "Direct user membership is not allowed — use externalGroups to manage membership via your identity provider"
+    - condition: >
+        spec.permissions
+            .filter(p, p.appInstance.endsWith("-prod") && p.resourceType == "TOPIC")
+            .all(p, p.permissions.all(perm, perm in ["topicConsume", "topicViewConfig", "topicDataQualityManage"]))
+      errorMessage: "For production topics, only consume, view config, and manage data quality are allowed"

@@ -1,0 +1,35 @@
+# ApplicationGroups grant Console UI permissions to people on the team.
+# appgroup-restrictions forbids listing users directly — membership comes from
+# your identity provider through externalGroups.
+apiVersion: self-serve/v1
+kind: ApplicationGroup
+metadata:
+  application: website-analytics
+  name: website-analytics-dev-developers
+spec:
+  displayName: "Website Analytics Developers (dev)"
+  description: "Full control over website-analytics resources in dev"
+  members: [] # must stay empty — see platform/policies/appgroup-restrictions.yml
+  externalGroups:
+    - website-analytics-devs
+  permissions:
+    - appInstance: website-analytics-dev
+      resourceType: TOPIC
+      patternType: LITERAL
+      name: "*" # '*' is scoped to what this application instance owns
+      permissions:
+        - topicViewConfig
+        - topicConsume
+        - topicProduce
+        - topicEditConfig
+        - topicCreate
+        - topicDelete
+    - appInstance: website-analytics-dev
+      resourceType: CONSUMER_GROUP
+      patternType: LITERAL
+      name: "*"
+      permissions:
+        - consumerGroupView
+        - consumerGroupReset
+        - consumerGroupCreate
+        - consumerGroupDelete
