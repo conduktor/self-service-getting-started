@@ -1,0 +1,12 @@
+apiVersion: self-serve/v1
+kind: ResourcePolicy
+metadata:
+  name: subject-rules
+spec:
+  targetKind: Subject
+  description: "Enforces subject naming and compatibility standards"
+  rules:
+    - condition: metadata.name.matches("^[a-z0-9-]+\\.[a-z0-9.-]+-(?:key|value)$")
+      errorMessage: "Subject name must end with -key or -value suffix"
+    - condition: has(spec.compatibility) && spec.compatibility in ["BACKWARD", "BACKWARD_TRANSITIVE", "FORWARD", "FORWARD_TRANSITIVE", "FULL", "FULL_TRANSITIVE"]
+      errorMessage: "Compatibility level has to be explicitly set and cannot be NONE"

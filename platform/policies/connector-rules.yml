@@ -1,0 +1,19 @@
+apiVersion: self-serve/v1
+kind: ResourcePolicy
+metadata:
+  name: connector-rules
+spec:
+  targetKind: Connector
+  description: "Restricts connector plugin classes and task limits"
+  rules:
+    - condition: >
+        spec.config["connector.class"] in [
+          "io.connect.jdbc.JdbcSourceConnector",
+          "io.connect.jdbc.JdbcSinkConnector",
+          "io.debezium.connector.postgresql.PostgresConnector",
+          "org.apache.kafka.connect.mirror.MirrorSourceConnector",
+          "com.amazonaws.kafka.connect.s3.S3SinkConnector"
+        ]
+      errorMessage: "Only approved connector classes are allowed — contact the platform team to request a new class"
+    - condition: int(spec.config["tasks.max"]) <= 8
+      errorMessage: "tasks.max cannot exceed 8"

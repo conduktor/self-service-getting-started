@@ -1,0 +1,26 @@
+# Conduktor Gateway fronting the same Kafka cluster.
+#
+# The quick start doesn't use this — it's here so the stack is complete and you
+# have somewhere to experiment with Gateway interceptors afterwards.
+# See https://docs.conduktor.io/guide/reference/gateway-reference
+---
+apiVersion: console/v2
+kind: KafkaCluster
+metadata:
+  name: conduktor-gateway
+spec:
+  displayName: "Conduktor Gateway"
+  icon: "kafka"
+  color: "#A020F0"
+  bootstrapServers: "conduktor-gateway:9092"
+  ignoreUntrustedCertificate: false
+  kafkaFlavor:
+    type: "Gateway"
+    url: "http://conduktor-gateway:8888"
+    user: "admin"
+    password: "conduktor"
+    virtualCluster: "passthrough"
+  properties:
+    security.protocol: SASL_PLAINTEXT
+    sasl.mechanism: PLAIN
+    sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
