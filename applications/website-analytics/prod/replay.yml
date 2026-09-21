@@ -1,0 +1,17 @@
+apiVersion: kafka/v2
+kind: Topic
+metadata:
+  cluster: "kafka-local"
+  name: website-analytics.prod.replay
+  labels:
+    instance: prod
+    business-unit: marketing
+    # confidentiality: internal  # must be included; uncomment to pass
+    team: website-analytics
+spec:
+  replicationFactor: 3
+  partitions: 24     # lower to < 12 to pass
+  configs:
+    cleanup.policy: delete
+    retention.ms: "604800000"
+    min.insync.replicas: "2"
